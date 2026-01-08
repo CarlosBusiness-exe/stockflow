@@ -12,7 +12,7 @@ async def create_tables() -> None:
 
     print("The tables have been created")
 
-    if __name__ == "__main__":
-        import asyncio
+if __name__ == "__main__":
+    import asyncio
 
-        asyncio.run(create_tables())
+    asyncio.run(create_tables())

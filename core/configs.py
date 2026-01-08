@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     DB_URL: str = "postgresql+asyncpg://usuario:senha@localhost:5432/banco_padrao"
 
     model_config = SettingsConfigDict(
-        env_files = ".env",
+        env_file = ".env",
         case_sensitive=True
     )
 
