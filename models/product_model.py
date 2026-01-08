@@ -7,4 +7,5 @@ class ProductModel(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
-    price: str
+    price: float
+    qtd: int
