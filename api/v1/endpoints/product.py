@@ -30,6 +30,6 @@ async def get_products(db: AsyncSession = Depends(get_session)):
     async with db as session:
         query = select(ProductModel)
         result = await session.execute(query)
-        products :List[result] = result.scalars().all()
+        products :List[ProductModel] = result.scalars().all()
 
     return products
