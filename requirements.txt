@@ -14,7 +14,7 @@ pydantic-settings==2.2.0
 pydantic_core==2.41.5
 python-dotenv==1.2.1
 PyYAML==6.0.3
-SQLAlchemy==2.0.0
+SQLAlchemy==2.0.45
 sqlmodel==0.0.16
 starlette==0.36.3
 typing-inspection==0.4.2
