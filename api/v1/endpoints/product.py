@@ -18,7 +18,7 @@ router = APIRouter()
 #POST
 @router.post("/", response_model=ProductModel, status_code=status.HTTP_201_CREATED)
 async def post_product(product: ProductModel, db: AsyncSession = Depends(get_session)):
-    new_product = ProductModel(name = product.name, price = product.price, qtd = product.qtd)
+    new_product = ProductModel(name = product.name, price = product.price, qtd = product.qtd, category_id=product.category_id)
 
     db.add(new_product)
     await db.commit()
@@ -61,6 +61,7 @@ async def put_product(product_id: int, product: ProductModel, db: AsyncSession =
         product_up.name = product.name
         product_up.price = product.price
         product_up.qtd = product.qtd
+        product_up.category_id = product.category_id
 
         await db.commit()
         await db.refresh(product_up)
