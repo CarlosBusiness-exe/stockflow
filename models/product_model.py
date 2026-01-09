@@ -10,4 +10,5 @@ class ProductModel(SQLModel, table=True):
     price: float
     qtd: int
     
-    category_id: Optional[int] = Field(default=None, foreign_key="categories.id")
+    category_id: int = Field(default=None, foreign_key="categories.id")
+    supplier_id: int = Field(default=None, foreign_key="suppliers.id")
