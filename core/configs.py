@@ -1,11 +1,12 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    API_V1_STR: str
-    DB_URL: str
-
     API_V1_STR: str = "/api/v1"
-    DB_URL: str = "postgresql+asyncpg://usuario:senha@localhost:5432/banco_padrao"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
+
+    DB_URL: str
+    JWT_SECRET: str
 
     model_config = SettingsConfigDict(
         env_file = ".env",
