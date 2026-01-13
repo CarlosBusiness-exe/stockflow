@@ -1,6 +1,9 @@
-from typing import Optional
+from typing import Optional, List, TYPE_CHECKING
 
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Relationship
+
+if TYPE_CHECKING:
+    from models.product_model import ProductModel
 
 class SupplierModel(SQLModel, table=True):
     __tablename__ = "suppliers"
@@ -9,3 +12,5 @@ class SupplierModel(SQLModel, table=True):
     name: str
     cnpj: str = Field(unique=True)
     address: str
+
+    products: List["ProductModel"] = Relationship(back_populates="suppliers")
