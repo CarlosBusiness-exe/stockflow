@@ -8,5 +8,8 @@ class ProductSchemaBase(SQLModel):
     category_id: int
     supplier_id: int
 
+class ProductSchemaCreate(ProductSchemaBase):
+    pass
+
 class ProductSchemaResponse(ProductSchemaBase):
     id: int

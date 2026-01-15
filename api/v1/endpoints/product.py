@@ -10,15 +10,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from models.product_model import ProductModel
-from core.deps import get_session
+from models.user_model import UserModel
+from schemas.product_schema import ProductSchemaCreate, ProductSchemaResponse
+from core.deps import get_session, get_current_user
 
 router = APIRouter()
 
 
 #POST
-@router.post("/", response_model=ProductModel, status_code=status.HTTP_201_CREATED)
-async def post_product(product: ProductModel, db: AsyncSession = Depends(get_session)):
-    new_product = ProductModel(name = product.name, price = product.price, qtd = product.qtd, category_id=product.category_id, supplier_id=product.supplier_id)
+@router.post("/", response_model=ProductSchemaResponse, status_code=status.HTTP_201_CREATED)
+async def post_product(product: ProductSchemaCreate, db: AsyncSession = Depends(get_session), logged_user: UserModel = Depends(get_current_user)):
+    new_product = ProductModel.model_validate(product)
 
     db.add(new_product)
     await db.commit()
@@ -28,7 +30,7 @@ async def post_product(product: ProductModel, db: AsyncSession = Depends(get_ses
 
 
 #GET PRODUCTS
-@router.get("/", response_model=List[ProductModel], status_code=status.HTTP_200_OK)
+@router.get("/", response_model=List[ProductSchemaResponse], status_code=status.HTTP_200_OK)
 async def get_products(db: AsyncSession = Depends(get_session)):
     query = select(ProductModel)
     result = await db.execute(query)
@@ -38,7 +40,7 @@ async def get_products(db: AsyncSession = Depends(get_session)):
 
 
 #GET PRODUCT
-@router.get("/{product_id}", response_model=ProductModel, status_code=status.HTTP_200_OK)
+@router.get("/{product_id}", response_model=ProductSchemaResponse, status_code=status.HTTP_200_OK)
 async def get_product(product_id: int, db: AsyncSession = Depends(get_session)):
     query = select(ProductModel).where(ProductModel.id == product_id)
     result = await db.execute(query)
@@ -51,18 +53,15 @@ async def get_product(product_id: int, db: AsyncSession = Depends(get_session)):
         
 
 #PUT PRODUCT
-@router.put("/{product_id}", response_model=ProductModel, status_code=status.HTTP_202_ACCEPTED)
-async def put_product(product_id: int, product: ProductModel, db: AsyncSession = Depends(get_session)):
+@router.put("/{product_id}", response_model=ProductSchemaResponse, status_code=status.HTTP_202_ACCEPTED)
+async def put_product(product_id: int, product: ProductSchemaCreate, db: AsyncSession = Depends(get_session), user_logged: UserModel = Depends(get_current_user)):
     query = select(ProductModel).where(ProductModel.id == product_id)
     result = await db.execute(query)
     product_up = result.scalar_one_or_none()
 
     if product_up:
-        product_up.name = product.name
-        product_up.price = product.price
-        product_up.qtd = product.qtd
-        product_up.category_id = product.category_id
-        product_up.supplier_id = product_up.supplier_id
+        product_data = product.model_dump(exclude_unset=True)
+        product_up.sqlmodel_update(product_data)
 
         await db.commit()
         await db.refresh(product_up)
@@ -74,7 +73,7 @@ async def put_product(product_id: int, product: ProductModel, db: AsyncSession =
 
 #DELETE PRODUCT
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_product(product_id: int, db: AsyncSession = Depends(get_session)):
+async def delete_product(product_id: int, db: AsyncSession = Depends(get_session), logged_user: UserModel = Depends(get_current_user)):
     query = select(ProductModel).where(ProductModel.id == product_id)
     result = await db.execute(query)
     product_del = result.scalar_one_or_none()
