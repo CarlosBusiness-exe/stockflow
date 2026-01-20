@@ -78,12 +78,27 @@ async def put_product(product_id: int, product: ProductSchemaCreate, db: AsyncSe
 
     if product_up:
         product_data = product.model_dump(exclude_unset=True)
+
+        query_cat = select(CategoryModel).where(CategoryModel.id == product.category_id)
+        result_cat = await db.execute(query_cat)
+        if not result_cat.scalar_one_or_none():
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Category with id {product.category_id} not found")
+
+        query_sup = select(SupplierModel).where(SupplierModel.id == product.supplier_id)
+        result_sup = await db.execute(query_sup)
+        if not result_sup.scalar_one_or_none():
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Supplier with id {product.supplier_id} not found")
+
         product_up.sqlmodel_update(product_data)
 
-        await db.commit()
-        await db.refresh(product_up)
-
-        return product_up
+        try:
+            db.add(product_up)
+            await db.commit()
+            await db.refresh(product_up)
+            return product_up
+        except IntegrityError:
+            # Caso ocorra um erro de concorrência (ex: alguém deletou o fornecedor no milissegundo entre a checagem e o save)
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Integrity error: verify Category and Supplier IDs")
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
         
