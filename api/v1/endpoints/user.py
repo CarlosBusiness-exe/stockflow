@@ -72,6 +72,8 @@ async def put_user(user_id: int, user: UserSchemaCreate, db: AsyncSession = Depe
 
         if "password" in user_data:
             user_data["password"] = generate_hash(user_data["password"])
+        
+        user_up.sqlmodel_update(user_data)
 
         db.add(user_up)
         await db.commit()
