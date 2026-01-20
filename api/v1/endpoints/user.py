@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.exc import IntegrityError
 
 from models.user_model import UserModel
 from schemas.user_schema import UserSchemaBase, UserSchemaCreate, UserSchemaResponse
@@ -22,15 +23,18 @@ def get_logged(logged_user: UserModel = Depends(get_current_user)):
 
 
 #POST/SIGNUP
-@router.post("/signup", response_model=UserSchemaBase, status_code=status.HTTP_201_CREATED)
+@router.post("/signup", response_model=UserSchemaResponse, status_code=status.HTTP_201_CREATED)
 async def post_user(user: UserSchemaCreate, db: AsyncSession = Depends(get_session)):
     new_user = UserModel.model_validate(user)
 
     new_user.password = generate_hash(user.password)
 
-    db.add(new_user)
-    await db.commit()
-    await db.refresh(new_user)
+    try:
+        db.add(new_user)
+        await db.commit()
+        await db.refresh(new_user)
+    except IntegrityError:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User with this email already exists!")
 
     return new_user
 

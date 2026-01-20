@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from sqlmodel import SQLModel
 
 from schemas.product_schema import ProductSchemaResponse

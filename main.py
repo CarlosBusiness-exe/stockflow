@@ -10,3 +10,8 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+"""TEST:
+TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNzY5NDcwODg2LCJpYXQiOjE3Njg4NjYwODYsInN1YiI6IjQifQ.prnzlko6sF2SlefvUCYXSbcVdEUEEwku12YV-D8H8nY
+TIPO: bearer
+"""
