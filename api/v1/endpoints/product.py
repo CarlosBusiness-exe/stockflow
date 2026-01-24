@@ -16,6 +16,7 @@ from models.supplier_model import SupplierModel
 from sqlalchemy.exc import IntegrityError
 from schemas.product_schema import ProductSchemaCreate, ProductSchemaResponse
 from core.deps import get_session, get_current_user
+from services import product_service
 
 router = APIRouter()
 
