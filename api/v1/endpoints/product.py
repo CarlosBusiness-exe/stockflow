@@ -51,35 +51,7 @@ async def get_product(product_id: int, db: AsyncSession = Depends(get_session)):
 #PUT PRODUCT
 @router.put("/{product_id}", response_model=ProductSchemaResponse, status_code=status.HTTP_202_ACCEPTED)
 async def put_product(product_id: int, product: ProductSchemaCreate, db: AsyncSession = Depends(get_session), user_logged: UserModel = Depends(get_current_user)):
-    query = select(ProductModel).where(ProductModel.id == product_id)
-    result = await db.execute(query)
-    product_up = result.scalar_one_or_none()
-
-    if product_up:
-        product_data = product.model_dump(exclude_unset=True)
-
-        query_cat = select(CategoryModel).where(CategoryModel.id == product.category_id)
-        result_cat = await db.execute(query_cat)
-        if not result_cat.scalar_one_or_none():
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Category with id {product.category_id} not found")
-
-        query_sup = select(SupplierModel).where(SupplierModel.id == product.supplier_id)
-        result_sup = await db.execute(query_sup)
-        if not result_sup.scalar_one_or_none():
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Supplier with id {product.supplier_id} not found")
-
-        product_up.sqlmodel_update(product_data)
-
-        try:
-            db.add(product_up)
-            await db.commit()
-            await db.refresh(product_up)
-            return product_up
-        except IntegrityError:
-            # Caso ocorra um erro de concorrência (ex: alguém deletou o fornecedor no milissegundo entre a checagem e o save)
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Integrity error: verify Category and Supplier IDs")
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    return await ProductService.update_product(product_id, product, db)
         
 
 #DELETE PRODUCT
