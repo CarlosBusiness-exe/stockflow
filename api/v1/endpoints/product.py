@@ -28,43 +28,23 @@ async def post_product(product: ProductSchemaCreate, db: AsyncSession = Depends(
 #GET PRODUCTS
 @router.get("/", response_model=List[ProductSchemaResponse], status_code=status.HTTP_200_OK)
 async def get_products(db: AsyncSession = Depends(get_session)):
-    query = select(ProductModel)
-    result = await db.execute(query)
-    products :List[ProductModel] = result.scalars().all()
-
-    return products
+    return await ProductService.get_all_products(db)
 
 
 #GET PRODUCT
 @router.get("/{product_id}", response_model=ProductSchemaResponse, status_code=status.HTTP_200_OK)
 async def get_product(product_id: int, db: AsyncSession = Depends(get_session)):
-    query = select(ProductModel).where(ProductModel.id == product_id)
-    result = await db.execute(query)
-    product = result.scalar_one_or_none()
-
-    if product:
-        return product
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found!")
+    return await ProductService.get_product_by_id(product_id, db)
         
 
 #PUT PRODUCT
 @router.put("/{product_id}", response_model=ProductSchemaResponse, status_code=status.HTTP_202_ACCEPTED)
 async def put_product(product_id: int, product: ProductSchemaCreate, db: AsyncSession = Depends(get_session), user_logged: UserModel = Depends(get_current_user)):
     return await ProductService.update_product(product_id, product, db)
-        
+
 
 #DELETE PRODUCT
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_product(product_id: int, db: AsyncSession = Depends(get_session), logged_user: UserModel = Depends(get_current_user)):
-    query = select(ProductModel).where(ProductModel.id == product_id)
-    result = await db.execute(query)
-    product_del = result.scalar_one_or_none()
-
-    if product_del:
-        await db.delete(product_del)
-        await db.commit()
-
-        return Response(status_code=status.HTTP_204_NO_CONTENT)
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    await ProductService.delete_product(product_id, db)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

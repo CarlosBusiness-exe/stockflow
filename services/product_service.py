@@ -22,12 +22,24 @@ class ProductService:
         await db.commit()
         await db.refresh(new_product)
         return new_product
+    
+    @staticmethod
+    async def get_product_by_id(product_id: int, db: AsyncSession):
+        product_up = await db.get(ProductModel, product_id)
+
+        if not product_up:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found.")
+        return product_up
+    
+    @staticmethod
+    async def get_all_products(db: AsyncSession):
+        query = select(ProductModel)
+        result = await db.execute(query)
+        return result.scalars().all()
 
     @staticmethod
     async def update_product(product_id: int, product_data: ProductSchemaCreate, db: AsyncSession):
-        product_up = await db.get(ProductModel, product_id)
-        if not product_up:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found.")
+        product_up = await ProductService.get_product_by_id(product_id, db)
         
         category = await db.get(CategoryModel, product_data.category_id)
         if not category:
@@ -44,3 +56,10 @@ class ProductService:
         await db.commit()
         await db.refresh(product_up)
         return product_up
+    
+    @staticmethod
+    async def delete_product(product_id: int, db: AsyncSession):
+        product_del = await ProductService.get_product_by_id(product_id, db)
+
+        await db.delete(product_del)
+        await db.commit()
