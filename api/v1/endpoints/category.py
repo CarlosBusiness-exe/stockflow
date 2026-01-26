@@ -43,29 +43,11 @@ async def get_category(category_id: int, db: AsyncSession = Depends(get_session)
 #PUT CATEGORY
 @router.put("/{category_id}", response_model=CategorySchemaResponse, status_code=status.HTTP_202_ACCEPTED)
 async def put_category(category_id: int, category: CategorySchemaBase, db: AsyncSession = Depends(get_session), user_logged: UserModel = Depends(get_current_user)):
-    category_up = await CategoryService.get_category_by_id(category_id, db)
-
-    if category_up:
-        category_data = category.model_dump(exclude_unset=True)
-        category_up.sqlmodel_update(category_data)
-
-        await db.commit()
-        await db.refresh(category_up)
-
-        return category_up
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
+   return await CategoryService.update_category(category_id, category, db)
     
 
 #DELETE CATEGORY
 @router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_category(category_id: int, db: AsyncSession = Depends(get_session), user_logged: UserModel = Depends(get_current_user)):
-    category_del = await CategoryService.get_category_by_id(category_id, db)
-
-    if category_del:
-        await db.delete(category_del)
-        await db.commit()
-
-        return Response(status_code=status.HTTP_204_NO_CONTENT)
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
+    await CategoryService.delete_category(category_id, db)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
