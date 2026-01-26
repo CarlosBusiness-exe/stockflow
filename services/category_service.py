@@ -1,4 +1,4 @@
-from sqlmodel.ext.asyncio import AsyncSession
+from sqlmodel.ext.asyncio.session import AsyncSession
 from models.category_model import CategoryModel
 from schemas.category_schema import CategorySchemaBase
 from fastapi import HTTPException, status
