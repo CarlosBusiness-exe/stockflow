@@ -21,10 +21,10 @@ class CategoryService:
         return category
     
     @staticmethod
-    async def update_category(category_id: int, category: CategorySchemaBase, db: AsyncSession):
+    async def update_category(category_id: int, category_data: CategorySchemaBase, db: AsyncSession):
         category_up = await CategoryService.get_category_by_id(category_id, db)
 
-        category_dict = category.model_dump(exclude_unset=True)
+        category_dict = category_data.model_dump(exclude_unset=True)
         category_up.sqlmodel_update(category_dict)
 
         await db.commit()
