@@ -1,3 +1,6 @@
 .env
 map.ini
 notes.txt
+__pycache__/
+.pytest_cache/
+*.py[cod]
